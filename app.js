@@ -37,6 +37,9 @@ mongoose
    require("./model/Dislike")                         // Dislike Model Import
    const Dislike=mongoose.model("dislikes")
 
+   require("./model/Comment")                         // Comments Model Import
+   const Comment=mongoose.model("comments")
+
   
 
   /*
@@ -317,10 +320,38 @@ app.post("/api/favorite/getFavoredMovie", (req, res) => {
   
   })
   
+/*
+    Comment API calls
+  */
 
 
+app.post("/api/comment/saveComment",(req, res) => {
 
-
+      const comment = new Comment(req.body)
+  
+      comment.save((err, comment) => {
+          console.log(err)
+          if (err) return res.json({ success: false, err })
+  
+          Comment.find({ '_id': comment._id })
+              .populate('writer')
+              .exec((err, result) => {
+                  if (err) return res.json({ success: false, err })
+                  return res.status(200).json({ success: true, result })
+              })
+      })
+  })
+  
+  app.post("/api/comment/getComments", (req, res) => {
+  
+      Comment.find({ "postId": req.body.movieId })
+          .populate('writer')
+          .exec((err, comments) => {
+              if (err) return res.status(400).send(err)
+              res.status(200).json({ success: true, comments })
+          })
+  });
+  
 
 
 
