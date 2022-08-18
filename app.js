@@ -25,12 +25,14 @@ mongoose
 
 
 
-  require("./model/userDetails");
+  require("./model/userDetails");                       // User Model Import
   const User = mongoose.model("users");
 
   
 
-
+  /*
+    Register,Login, Logout API calls
+  */
 
 
 app.post("/api/users/register", async (req, res) => {
@@ -43,13 +45,17 @@ app.post("/api/users/register", async (req, res) => {
     if (oldUser) {
       return res.json({  success: false });
     }
+
+   
+
+
     await User.create({
       name,
       email,
       password: encryptedPassword,
       lastname,
       role,
-      token
+      token:""
     });
     res.send({  success: true });
   } catch (error) {
@@ -63,18 +69,18 @@ app.post("/api/users/register", async (req, res) => {
 
 app.post("/api/users/login", async (req, res) => {
   const { email, password } = req.body;
+  const token = jwt.sign({ email: email }, JWT_SECRET);
   
-  const user = await User.findOne({ email });
+  const user = await User.findOneAndUpdate({ email:email },{token:token});
   
 
     if (!user) {
       return res.json({ loginSuccess: false,  message: "Auth failed, email not found" });
     }
     if (await bcrypt.compare(password, user.password)) {
-      const token = jwt.sign({ email: user.email }, JWT_SECRET);
-  
-    if (res.status(201)) {
-        return res.json({  loginSuccess: true, userId: user._id, name:user.name, token:token });
+
+   if (res.status(201)) {
+        return res.json({  loginSuccess: true, userId: user._id, name:user.name, token:token});
       } else {
         return res.json({ error: "error" });
       }
@@ -86,6 +92,18 @@ app.post("/api/users/login", async (req, res) => {
 
 
 
+app.post("/api/users/logout", async (req, res) => {
+  const { userId } = req.body;
+  User.findOneAndUpdate({ _id:userId}, { token: ""}, (err, doc) => {
+    if (err) return res.json({ success: false, err });
+    return res.status(200).send({
+        success: true
+    });
+});
+
+
+
+});
 
 
 
