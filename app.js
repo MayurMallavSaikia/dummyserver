@@ -50,10 +50,10 @@ app.post("/api/users/register", async (req, res) => {
 
 
     await User.create({
-      name,
-      email,
+      name:name,
+      email:email,
       password: encryptedPassword,
-      lastname,
+      lastname:lastname,
       role,
       token:""
     });
