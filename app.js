@@ -324,13 +324,14 @@ app.post("/api/favorite/getFavoredMovie", (req, res) => {
 app.post("/api/comment/saveComment", async(req, res) => {
 
 
-    const {writer,postId,content}=req.body
+    const {writer,postId,content,writerName}=req.body
   
      try{
       await Comment.create({
        postId,
        writer,
-       content
+       content,
+       writerName
       });
       res.send({  success: true, result:req.body });
      }

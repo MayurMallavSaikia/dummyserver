@@ -15,6 +15,9 @@ const commentSchema = mongoose.Schema({
     },
     content: {
         type: String
+    },
+    writerName:{
+        type:String
     }
 
 }, { timestamps: true })
