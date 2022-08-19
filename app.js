@@ -6,7 +6,6 @@ const cors = require("cors");
 app.use(cors());
 const bcrypt = require("bcryptjs");
 
-
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET =
@@ -57,9 +56,6 @@ app.post("/api/users/register", async (req, res) => {
     if (oldUser) {
       return res.json({  success: false });
     }
-
-   
-
 
     await User.create({
       name:name,
@@ -325,36 +321,55 @@ app.post("/api/favorite/getFavoredMovie", (req, res) => {
   */
 
 
-app.post("/api/comment/saveComment",(req, res) => {
+app.post("/api/comment/saveComment", async(req, res) => {
 
-      const comment = new Comment(req.body)
+
+    const {writer,postId,content}=req.body
   
-      comment.save((err, comment) => {
-          console.log(err)
-          if (err) return res.json({ success: false, err })
-  
-          Comment.find({ '_id': comment._id })
-              .populate('writer')
-              .exec((err, result) => {
-                  if (err) return res.json({ success: false, err })
-                  return res.status(200).json({ success: true, result })
-              })
-      })
+     try{
+      await Comment.create({
+       postId,
+       writer,
+       content
+      });
+      res.send({  success: true, result:req.body });
+     }
+     catch(err){
+        res.send({success:false});
+     }
   })
   
-  app.post("/api/comment/getComments", (req, res) => {
-  
-      Comment.find({ "postId": req.body.movieId })
-          .populate('writer')
-          .exec((err, comments) => {
-              if (err) return res.status(400).send(err)
-              res.status(200).json({ success: true, comments })
+  app.post("/api/comment/getComments", async(req, res) => {
+    
+    try{
+          await Comment.find({postId:req.body.postId}).exec((err, comments)=>{
+              if(err) 
+                 return res.send({success: false, err})
+              else
+                return res.send({success:true, comments})
+                
           })
+    }
+
+    catch(err)
+       {
+          res.send({success:false, err})
+       }
+      
   });
   
 
 
 
+//   app.post("/getComments", (req, res) => {
+
+//     Comment.find({ "postId": req.body.postId})
+//         .populate('writer')
+//         .exec((err, comments) => {
+//             if (err) return res.status(400).send(err)
+//             res.status(200).json({ success: true, comments })
+//         })
+// });
 
 
 
